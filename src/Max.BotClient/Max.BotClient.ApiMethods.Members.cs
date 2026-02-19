@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Max.BotClient.DTOs;
-using Max.BotClient.Types;
 using Max.BotClient.Mapping;
 
 namespace Max.BotClient
@@ -22,18 +19,11 @@ namespace Max.BotClient
             this BotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/members/me";
-
-            var response = await botClient.ProcessApi<DTOs.ChatMember, Types.ChatMember>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response;
-        }
+        ) => await botClient.ProcessApi<DTOs.ChatMember, Types.ChatMember>(
+            HttpMethod.Get,
+            $"/chats/{chatId}/members/me",
+            cancellationToken: cancellationToken
+        );
 
         /// <summary>
         /// Удалить бота из участников группового чата.
@@ -47,18 +37,11 @@ namespace Max.BotClient
             this BotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/members/me";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Delete,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<DTOs.ApiResponse>(
+            HttpMethod.Delete,
+            $"/chats/{chatId}/members/me",
+            cancellationToken: cancellationToken
+        )).Success;
 
         /// <summary>
         /// Получение участников группового чата.
@@ -78,29 +61,12 @@ namespace Max.BotClient
             int? count = null,
             long? marker = null,
             CancellationToken cancellationToken = default
-        )
-        {
-            var queryParams = new List<string>();
-
-            if (userIds != null && userIds.Length > 0)
-                queryParams.Add($"user_ids={string.Join(",", userIds)}");
-            if (count.HasValue)
-                queryParams.Add($"count={count.Value}");
-            if (marker.HasValue)
-                queryParams.Add($"marker={marker.Value}");
-
-            var path = $"/chats/{chatId}/members";
-            if (queryParams.Count > 0)
-                path += "?" + string.Join("&", queryParams);
-
-            var response = await botClient.ProcessApi<DTOs.GetChatMembersResponse, Types.GetChatMembersResponse>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response;
-        }
+        ) => await botClient.ProcessApi<GetChatMembersParams, DTOs.GetChatMembersResponse, Types.GetChatMembersResponse>(
+            HttpMethod.Get,
+            $"/chats/{chatId}/members",
+            () => new GetChatMembersParams { UserIds = userIds, Count = count, Marker = marker },
+            cancellationToken
+        );
 
         /// <summary>
         /// Добавить участников в групповой чат.
@@ -117,19 +83,12 @@ namespace Max.BotClient
             long chatId,
             long[] userIds,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/members";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Post,
-                path,
-                new { user_ids = userIds },
-                cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<AddChatMembersParams, DTOs.ApiResponse>(
+            HttpMethod.Post,
+            $"/chats/{chatId}/members",
+            () => new AddChatMembersParams { UserIds = userIds },
+            cancellationToken
+        )).Success;
 
         /// <summary>
         /// Удалить участника из группового чата.
@@ -148,23 +107,12 @@ namespace Max.BotClient
             long userId,
             bool? block = null,
             CancellationToken cancellationToken = default
-        )
-        {
-            var queryParams = new List<string> { $"user_id={userId}" };
-
-            if (block.HasValue)
-                queryParams.Add($"block={block.Value.ToString().ToLowerInvariant()}");
-
-            var path = $"/chats/{chatId}/members?" + string.Join("&", queryParams);
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Delete,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<RemoveChatMemberParams, DTOs.ApiResponse>(
+            HttpMethod.Delete,
+            $"/chats/{chatId}/members",
+            () => new RemoveChatMemberParams { UserId = userId, Block = block },
+            cancellationToken
+        )).Success;
 
         /// <summary>
         /// Получить список администраторов группового чата.
@@ -179,18 +127,11 @@ namespace Max.BotClient
             this BotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/members/admins";
-
-            var response = await botClient.ProcessApi<DTOs.GetChatMembersResponse, Types.GetChatMembersResponse>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response;
-        }
+        ) => await botClient.ProcessApi<DTOs.GetChatMembersResponse, Types.GetChatMembersResponse>(
+            HttpMethod.Get,
+            $"/chats/{chatId}/members/admins",
+            cancellationToken: cancellationToken
+        );
 
         /// <summary>
         /// Назначить администраторов группового чата.
@@ -206,19 +147,12 @@ namespace Max.BotClient
             long chatId,
             Types.ChatAdmin[] admins,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/members/admins";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Post,
-                path,
-                new DTOs.AddChatAdminsRequest { Admins = admins.ToDto() },
-                cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<DTOs.ApiResponse>(
+            HttpMethod.Post,
+            $"/chats/{chatId}/members/admins",
+            new DTOs.AddChatAdminsRequest { Admins = admins.ToDto() },
+            cancellationToken
+        )).Success;
 
         /// <summary>
         /// Отменить права администратора у пользователя в групповом чате.
@@ -234,17 +168,10 @@ namespace Max.BotClient
             long chatId,
             long userId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/members/admins/{userId}";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Delete,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<DTOs.ApiResponse>(
+            HttpMethod.Delete,
+            $"/chats/{chatId}/members/admins/{userId}",
+            cancellationToken: cancellationToken
+        )).Success;
     }
 }

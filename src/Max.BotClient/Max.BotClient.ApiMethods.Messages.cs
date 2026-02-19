@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Max.BotClient.DTOs;
 using Max.BotClient.Mapping;
 
 namespace Max.BotClient
@@ -28,27 +26,12 @@ namespace Max.BotClient
             long? to = null,
             int? count = null,
             CancellationToken cancellationToken = default
-        )
-        {
-            var queryParams = new List<string> { $"chat_id={chatId}" };
-
-            if (from.HasValue)
-                queryParams.Add($"from={from.Value}");
-            if (to.HasValue)
-                queryParams.Add($"to={to.Value}");
-            if (count.HasValue)
-                queryParams.Add($"count={count.Value}");
-
-            var path = "/messages?" + string.Join("&", queryParams);
-
-            var response = await botClient.ProcessApi<DTOs.GetMessagesResponse, Types.GetMessagesResponse>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response.Messages ?? Array.Empty<Types.Message>();
-        }
+        ) => (await botClient.ProcessApi<GetMessagesByChatParams, DTOs.GetMessagesResponse, Types.GetMessagesResponse>(
+            HttpMethod.Get,
+            "/messages",
+            () => new GetMessagesByChatParams { ChatId = chatId, From = from, To = to, Count = count },
+            cancellationToken
+        )).Messages ?? Array.Empty<Types.Message>();
 
         /// <summary>
         /// Получить сообщения по их ID.
@@ -62,18 +45,12 @@ namespace Max.BotClient
             this BotClient botClient,
             string[] messageIds,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/messages?message_ids={string.Join(",", messageIds)}";
-
-            var response = await botClient.ProcessApi<DTOs.GetMessagesResponse, Types.GetMessagesResponse>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response.Messages ?? Array.Empty<Types.Message>();
-        }
+        ) => (await botClient.ProcessApi<GetMessagesByIdsParams, DTOs.GetMessagesResponse, Types.GetMessagesResponse>(
+            HttpMethod.Get,
+            "/messages",
+            () => new GetMessagesByIdsParams { MessageIds = messageIds },
+            cancellationToken
+        )).Messages ?? Array.Empty<Types.Message>();
 
         /// <summary>
         /// Получить сообщение по его ID.
@@ -87,18 +64,11 @@ namespace Max.BotClient
             this BotClient botClient,
             string messageId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/messages/{Uri.EscapeDataString(messageId)}";
-
-            var response = await botClient.ProcessApi<DTOs.Message, Types.Message>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response;
-        }
+        ) => await botClient.ProcessApi<DTOs.Message, Types.Message>(
+            HttpMethod.Get,
+            $"/messages/{Uri.EscapeDataString(messageId)}",
+            cancellationToken: cancellationToken
+        );
 
         /// <summary>
         /// Отправить сообщение пользователю или в чат.
@@ -116,27 +86,18 @@ namespace Max.BotClient
             Types.Message message,
             bool? disableLinkPreview = null,
             CancellationToken cancellationToken = default
-        )
-        {
-            var recipientParam = message.GetRecipientType() == Types.RecipientType.Chat
-                ? $"chat_id={id}"
-                : $"user_id={id}";
-
-            var queryParams = new List<string> { recipientParam };
-            if (disableLinkPreview.HasValue)
-                queryParams.Add($"disable_link_preview={disableLinkPreview.Value.ToString().ToLowerInvariant()}");
-
-            var path = "/messages?" + string.Join("&", queryParams);
-
-            var response = await botClient.ProcessApi<DTOs.SendMessageResponse, Types.SendMessageResponse>(
-                HttpMethod.Post,
-                path,
-                message.ToMessageBody().ToDto(),
-                cancellationToken
-            );
-
-            return response.Message;
-        }
+        ) => (await botClient.ProcessApi<SendMessageParams, DTOs.SendMessageResponse, Types.SendMessageResponse>(
+            HttpMethod.Post,
+            "/messages",
+            () => new SendMessageParams
+            {
+                ChatId = message.GetRecipientType() == Types.RecipientType.Chat ? id : null,
+                UserId = message.GetRecipientType() != Types.RecipientType.Chat ? id : null,
+                DisableLinkPreview = disableLinkPreview,
+                Body = message.ToMessageBody().ToDto()
+            },
+            cancellationToken
+        )).Message;
 
         /// <summary>
         /// Редактировать сообщение в чате.
@@ -153,19 +114,12 @@ namespace Max.BotClient
             string messageId,
             Types.Message message,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/messages?message_id={Uri.EscapeDataString(messageId)}";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                new HttpMethod("PUT"),
-                path,
-                message.ToMessageBody().ToDto(),
-                cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<EditMessageParams, DTOs.ApiResponse>(
+            new HttpMethod("PUT"),
+            "/messages",
+            () => new EditMessageParams { MessageId = messageId, Body = message.ToMessageBody().ToDto() },
+            cancellationToken
+        )).Success;
 
         /// <summary>
         /// Удалить сообщение в диалоге или чате.
@@ -180,18 +134,12 @@ namespace Max.BotClient
             this BotClient botClient,
             string messageId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/messages?message_id={Uri.EscapeDataString(messageId)}";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Delete,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<DeleteMessageParams, DTOs.ApiResponse>(
+            HttpMethod.Delete,
+            "/messages",
+            () => new DeleteMessageParams { MessageId = messageId },
+            cancellationToken
+        )).Success;
 
         /// <summary>
         /// Отправить ответ на нажатие кнопки пользователем.
@@ -210,24 +158,16 @@ namespace Max.BotClient
             Types.Message? message = null,
             string? notification = null,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/answers?callback_id={Uri.EscapeDataString(callbackId)}";
-
-            var requestBody = new
+        ) => (await botClient.ProcessApi<AnswerCallbackParams, DTOs.ApiResponse>(
+            HttpMethod.Post,
+            "/answers",
+            () => new AnswerCallbackParams
             {
-                message = message?.ToMessageBody().ToDto(),
-                notification = notification
-            };
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Post,
-                path,
-                requestBody,
-                cancellationToken
-            );
-
-            return response.Success;
-        }
+                CallbackId = callbackId,
+                Message = message?.ToMessageBody().ToDto(),
+                Notification = notification
+            },
+            cancellationToken
+        )).Success;
     }
 }

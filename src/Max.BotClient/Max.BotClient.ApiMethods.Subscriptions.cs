@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,10 +55,11 @@ namespace Max.BotClient
             this BotClient botClient,
             string url,
             CancellationToken cancellationToken = default
-        ) => await botClient.ProcessApi<SubscribeResult>(
+        ) => await botClient.ProcessApi<UnsubscribeParams, SubscribeResult>(
             HttpMethod.Delete,
-            $"/subscriptions?url={Uri.EscapeDataString(url)}",
-            cancellationToken: cancellationToken
+            "/subscriptions",
+            () => new UnsubscribeParams { Url = url },
+            cancellationToken
         );
 
         /// <summary>
@@ -83,25 +81,11 @@ namespace Max.BotClient
             CancellationToken cancellationToken = default
         )
         {
-            var queryParams = new List<string>();
-
-            if (limit.HasValue)
-                queryParams.Add($"limit={limit.Value}");
-            if (timeout.HasValue)
-                queryParams.Add($"timeout={timeout.Value}");
-            if (marker.HasValue)
-                queryParams.Add($"marker={marker.Value}");
-            if (types != null && types.Length > 0)
-                queryParams.Add($"types={string.Join(",", types.Select(t => t.ToString().ToSnakeCase()))}");
-
-            var path = "/updates";
-            if (queryParams.Count > 0)
-                path += "?" + string.Join("&", queryParams);
-
-            var response = await botClient.ProcessApi<DTOs.GetUpdatesResponse, Types.GetUpdatesResponse>(
+            var response = await botClient.ProcessApi<GetUpdatesParams, DTOs.GetUpdatesResponse, Types.GetUpdatesResponse>(
                 HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
+                "/updates",
+                () => new GetUpdatesParams { Limit = limit, Timeout = timeout, Marker = marker, UpdateTypes = types },
+                cancellationToken
             );
 
             return (response.Updates, response.Marker);

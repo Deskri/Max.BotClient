@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,26 +22,12 @@ namespace Max.BotClient
             int? count = null,
             long? marker = null,
             CancellationToken cancellationToken = default
-        )
-        {
-            var queryParams = new List<string>();
-            if (count.HasValue)
-                queryParams.Add($"count={count.Value}");
-            if (marker.HasValue)
-                queryParams.Add($"marker={marker.Value}");
-
-            var path = queryParams.Count > 0
-                ? $"/chats?{string.Join("&", queryParams)}"
-                : "/chats";
-
-            var response = await botClient.ProcessApi<DTOs.GetChatsResponse, Types.GetChatsResponse>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response;
-        }
+        ) => await botClient.ProcessApi<GetChatsParams, DTOs.GetChatsResponse, Types.GetChatsResponse>(
+            HttpMethod.Get,
+            "/chats",
+            () => new GetChatsParams { Count = count, Marker = marker },
+            cancellationToken
+        );
 
         /// <summary>
         /// Получить информацию о групповом чате по его ID.
@@ -56,18 +41,11 @@ namespace Max.BotClient
             this BotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}";
-
-            var response = await botClient.ProcessApi<DTOs.Chat, Types.Chat>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response;
-        }
+        ) => await botClient.ProcessApi<DTOs.Chat, Types.Chat>(
+            HttpMethod.Get,
+            $"/chats/{chatId}",
+            cancellationToken: cancellationToken
+        );
 
         /// <summary>
         /// Изменить информацию о групповом чате.
@@ -83,19 +61,12 @@ namespace Max.BotClient
             long chatId,
             Types.UpdateChatRequest request,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}";
-
-            var response = await botClient.ProcessApi<DTOs.Chat, Types.Chat>(
-                new HttpMethod("PATCH"),
-                path,
-                request.ToDto(),
-                cancellationToken
-            );
-
-            return response;
-        }
+        ) => await botClient.ProcessApi<DTOs.Chat, Types.Chat>(
+            new HttpMethod("PATCH"),
+            $"/chats/{chatId}",
+            request.ToDto(),
+            cancellationToken
+        );
 
         /// <summary>
         /// Удалить групповой чат для всех участников.
@@ -109,18 +80,11 @@ namespace Max.BotClient
             this BotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Delete,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<ApiResponse>(
+            HttpMethod.Delete,
+            $"/chats/{chatId}",
+            cancellationToken: cancellationToken
+        )).Success;
 
         /// <summary>
         /// Отправить действие бота в групповой чат.
@@ -136,19 +100,12 @@ namespace Max.BotClient
             long chatId,
             Types.SenderAction action,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/actions";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Post,
-                path,
-                new { action = action.ToString().ToSnakeCase() },
-                cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<SendActionParams, ApiResponse>(
+            HttpMethod.Post,
+            $"/chats/{chatId}/actions",
+            () => new SendActionParams { Action = action },
+            cancellationToken
+        )).Success;
 
         /// <summary>
         /// Получить закреплённое сообщение в групповом чате.
@@ -162,18 +119,11 @@ namespace Max.BotClient
             this BotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/pin";
-
-            var response = await botClient.ProcessApi<DTOs.GetPinnedMessageResponse, Types.GetPinnedMessageResponse>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response?.Message;
-        }
+        ) => (await botClient.ProcessApi<DTOs.GetPinnedMessageResponse, Types.GetPinnedMessageResponse>(
+            HttpMethod.Get,
+            $"/chats/{chatId}/pin",
+            cancellationToken: cancellationToken
+        )).Message;
 
         /// <summary>
         /// Закрепить сообщение в групповом чате.
@@ -191,23 +141,12 @@ namespace Max.BotClient
             string messageId,
             bool? notify = null,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/pin";
-
-            var requestBody = notify.HasValue
-                ? new { message_id = messageId, notify = notify.Value }
-                : (object)new { message_id = messageId };
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                new HttpMethod("PUT"),
-                path,
-                requestBody,
-                cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<PinMessageParams, ApiResponse>(
+            new HttpMethod("PUT"),
+            $"/chats/{chatId}/pin",
+            () => new PinMessageParams { MessageId = messageId, Notify = notify },
+            cancellationToken
+        )).Success;
 
         /// <summary>
         /// Удалить закреплённое сообщение в групповом чате.
@@ -221,17 +160,10 @@ namespace Max.BotClient
             this BotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/chats/{chatId}/pin";
-
-            var response = await botClient.ProcessApi<ApiResponse>(
-                HttpMethod.Delete,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response.Success;
-        }
+        ) => (await botClient.ProcessApi<ApiResponse>(
+            HttpMethod.Delete,
+            $"/chats/{chatId}/pin",
+            cancellationToken: cancellationToken
+        )).Success;
     }
 }

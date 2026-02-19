@@ -2,8 +2,6 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Max.BotClient.DTOs;
-using Max.BotClient.Types;
 
 namespace Max.BotClient
 {
@@ -15,10 +13,10 @@ namespace Max.BotClient
         /// </summary>
         /// <param name="botClient">Клиент бота.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
-        public static async Task<BotInfo> GetMe(
+        public static async Task<Types.BotInfo> GetMe(
             this BotClient botClient,
             CancellationToken cancellationToken = default
-        ) => await botClient.ProcessApi<UserBotInfo, BotInfo>(
+        ) => await botClient.ProcessApi<DTOs.UserBotInfo, Types.BotInfo>(
             HttpMethod.Get,
             "/me",
             cancellationToken: cancellationToken
@@ -32,14 +30,15 @@ namespace Max.BotClient
         /// <param name="type">Тип загружаемого файла.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>URL для загрузки и токен (для video/audio).</returns>
-        public static async Task<UploadResult> GetUploadUrl(
+        public static async Task<Types.UploadResult> GetUploadUrl(
             this BotClient botClient,
-            UploadType type,
+            Types.UploadType type,
             CancellationToken cancellationToken = default
-        ) => await botClient.ProcessApi<UploadResult>(
+        ) => await botClient.ProcessApi<GetUploadUrlParams, Types.UploadResult>(
             HttpMethod.Post,
-            $"/uploads?type={type.ToString().ToSnakeCase()}",
-            cancellationToken: cancellationToken
+            "/uploads",
+            () => new GetUploadUrlParams { Type = type },
+            cancellationToken
         );
 
         /// <summary>
@@ -54,17 +53,10 @@ namespace Max.BotClient
             this BotClient botClient,
             string videoToken,
             CancellationToken cancellationToken = default
-        )
-        {
-            var path = $"/videos/{Uri.EscapeDataString(videoToken)}";
-
-            var response = await botClient.ProcessApi<DTOs.VideoInfo, Types.VideoInfo>(
-                HttpMethod.Get,
-                path,
-                cancellationToken: cancellationToken
-            );
-
-            return response;
-        }
+        ) => await botClient.ProcessApi<DTOs.VideoInfo, Types.VideoInfo>(
+            HttpMethod.Get,
+            $"/videos/{Uri.EscapeDataString(videoToken)}",
+            cancellationToken: cancellationToken
+        );
     }
 }
