@@ -5,7 +5,9 @@ namespace Max.BotClient.DTOs
     /// </summary>
     internal enum ChatType
     {
-        Chat
+        Chat,
+        Dialog,
+        Channel
     }
 
     /// <summary>

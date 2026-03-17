@@ -30,7 +30,9 @@ namespace Max.BotClient.Types
     /// </summary>
     public enum ChatType
     {
-        Chat
+        Chat,
+        Dialog,
+        Channel
     }
 
     /// <summary>
