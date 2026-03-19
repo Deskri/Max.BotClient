@@ -9,7 +9,7 @@ namespace Max.BotClient
     internal static class BotClientApiMethodsExtensions
     {
         public static async Task<TResult> ProcessApi<TDto, TResult>(
-            this BotClient botClient,
+            this IBotClient botClient,
             HttpMethod method,
             string path,
             object? body = null,
@@ -21,7 +21,7 @@ namespace Max.BotClient
         }
 
         public static async Task<TResponse> ProcessApi<TResponse>(
-            this BotClient botClient,
+            this IBotClient botClient,
             HttpMethod method,
             string path,
             object? body = null,
@@ -29,7 +29,7 @@ namespace Max.BotClient
         ) => await botClient.SendRequest<TResponse>(method, path, body, cancellationToken);
 
         public static async Task ProcessApi(
-            this BotClient botClient,
+            this IBotClient botClient,
             HttpMethod method,
             string path,
             object? body = null,
@@ -37,7 +37,7 @@ namespace Max.BotClient
         ) => await botClient.SendRequest<object>(method, path, body, cancellationToken);
 
         public static async Task<TResult> ProcessApi<TParams, TDto, TResult>(
-            this BotClient botClient,
+            this IBotClient botClient,
             HttpMethod method,
             string basePath,
             Func<TParams> createParams,
@@ -50,7 +50,7 @@ namespace Max.BotClient
         }
 
         public static async Task<TResponse> ProcessApi<TParams, TResponse>(
-            this BotClient botClient,
+            this IBotClient botClient,
             HttpMethod method,
             string basePath,
             Func<TParams> createParams,
@@ -62,7 +62,7 @@ namespace Max.BotClient
         }
 
         public static async Task ProcessApi<TParams>(
-            this BotClient botClient,
+            this IBotClient botClient,
             HttpMethod method,
             string basePath,
             Func<TParams> createParams,

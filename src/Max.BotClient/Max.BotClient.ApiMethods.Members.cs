@@ -16,7 +16,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Информация о членстве бота в чате.</returns>
         public static async Task<Types.ChatMember> GetMyMembership(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
         ) => await botClient.ProcessApi<DTOs.ChatMember, Types.ChatMember>(
@@ -34,7 +34,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>true, если запрос был успешным.</returns>
         public static async Task<bool> LeaveChat(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
         ) => (await botClient.ProcessApi<DTOs.ApiResponse>(
@@ -55,7 +55,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Список участников чата и маркер для следующей страницы.</returns>
         public static async Task<Types.GetChatMembersResponse> GetChatMembers(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             long[]? userIds = null,
             int? count = null,
@@ -79,7 +79,7 @@ namespace Max.BotClient
         /// <returns>true, если запрос был успешным.</returns>
         /// <remarks>Для добавления участников могут потребоваться дополнительные права.</remarks>
         public static async Task<bool> AddChatMembers(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             long[] userIds,
             CancellationToken cancellationToken = default
@@ -102,7 +102,7 @@ namespace Max.BotClient
         /// <returns>true, если запрос был успешным.</returns>
         /// <remarks>Для удаления участников могут потребоваться дополнительные права.</remarks>
         public static async Task<bool> RemoveChatMember(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             long userId,
             bool? block = null,
@@ -124,7 +124,7 @@ namespace Max.BotClient
         /// <returns>Список администраторов чата с информацией о членстве.</returns>
         /// <remarks>Бот должен быть администратором в запрашиваемом чате.</remarks>
         public static async Task<Types.GetChatMembersResponse> GetChatAdmins(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
         ) => await botClient.ProcessApi<DTOs.GetChatMembersResponse, Types.GetChatMembersResponse>(
@@ -143,7 +143,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>true, если все администраторы успешно добавлены.</returns>
         public static async Task<bool> AddChatAdmins(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             Types.ChatAdmin[] admins,
             CancellationToken cancellationToken = default
@@ -164,7 +164,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>true, если запрос был успешным.</returns>
         public static async Task<bool> RemoveChatAdmin(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             long userId,
             CancellationToken cancellationToken = default

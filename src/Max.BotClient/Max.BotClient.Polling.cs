@@ -43,9 +43,9 @@ namespace Max.BotClient
         /// <param name="options">Опции polling.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
         public static void StartReceiving(
-            this BotClient botClient,
-            Func<BotClient, Update, CancellationToken, Task> updateHandler,
-            Func<BotClient, Exception, CancellationToken, Task>? errorHandler = null,
+            this IBotClient botClient,
+            Func<IBotClient, Update, CancellationToken, Task> updateHandler,
+            Func<IBotClient, Exception, CancellationToken, Task>? errorHandler = null,
             ReceiverOptions? options = null,
             CancellationToken cancellationToken = default
         ) => Task.Run(() => 
@@ -68,9 +68,9 @@ namespace Max.BotClient
         /// <param name="options">Опции polling.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
         public static async Task ReceiveAsync(
-            this BotClient botClient,
-            Func<BotClient, Update, CancellationToken, Task> updateHandler,
-            Func<BotClient, Exception, CancellationToken, Task>? errorHandler = null,
+            this IBotClient botClient,
+            Func<IBotClient, Update, CancellationToken, Task> updateHandler,
+            Func<IBotClient, Exception, CancellationToken, Task>? errorHandler = null,
             ReceiverOptions? options = null,
             CancellationToken cancellationToken = default
         )

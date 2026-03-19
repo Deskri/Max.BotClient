@@ -14,7 +14,7 @@ namespace Max.BotClient
         /// <param name="botClient">Клиент бота.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
         public static async Task<Types.BotInfo> GetMe(
-            this BotClient botClient,
+            this IBotClient botClient,
             CancellationToken cancellationToken = default
         ) => await botClient.ProcessApi<DTOs.UserBotInfo, Types.BotInfo>(
             HttpMethod.Get,
@@ -31,7 +31,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>URL для загрузки и токен (для video/audio).</returns>
         public static async Task<Types.UploadResult> GetUploadUrl(
-            this BotClient botClient,
+            this IBotClient botClient,
             Types.UploadType type,
             CancellationToken cancellationToken = default
         ) => await botClient.ProcessApi<GetUploadUrlParams, Types.UploadResult>(
@@ -50,7 +50,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Подробная информация о видео, включая URL-адреса воспроизведения и метаданные.</returns>
         public static async Task<Types.VideoInfo> GetVideo(
-            this BotClient botClient,
+            this IBotClient botClient,
             string videoToken,
             CancellationToken cancellationToken = default
         ) => await botClient.ProcessApi<DTOs.VideoInfo, Types.VideoInfo>(

@@ -20,7 +20,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Массив сообщений (последние сообщения первыми).</returns>
         public static async Task<Types.Message[]> GetMessages(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             long? from = null,
             long? to = null,
@@ -42,7 +42,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Массив сообщений.</returns>
         public static async Task<Types.Message[]> GetMessages(
-            this BotClient botClient,
+            this IBotClient botClient,
             string[] messageIds,
             CancellationToken cancellationToken = default
         ) => (await botClient.ProcessApi<GetMessagesByIdsParams, DTOs.GetMessagesResponse, Types.GetMessagesResponse>(
@@ -61,7 +61,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Сообщение с указанным ID.</returns>
         public static async Task<Types.Message> GetMessage(
-            this BotClient botClient,
+            this IBotClient botClient,
             string messageId,
             CancellationToken cancellationToken = default
         ) => await botClient.ProcessApi<DTOs.Message, Types.Message>(
@@ -81,7 +81,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Отправленное сообщение.</returns>
         public static async Task<Types.Message?> SendMessage(
-            this BotClient botClient,
+            this IBotClient botClient,
             long id,
             Types.Message message,
             bool? disableLinkPreview = null,
@@ -110,7 +110,7 @@ namespace Max.BotClient
         /// <returns>true, если запрос был успешным.</returns>
         /// <remarks>С помощью метода можно отредактировать сообщения, которые отправлены менее 24 часов назад.</remarks>
         public static async Task<bool> EditMessage(
-            this BotClient botClient,
+            this IBotClient botClient,
             string messageId,
             Types.Message message,
             CancellationToken cancellationToken = default
@@ -131,7 +131,7 @@ namespace Max.BotClient
         /// <returns>true, если запрос был успешным.</returns>
         /// <remarks>С помощью метода можно удалять сообщения, которые отправлены менее 24 часов назад. Бот должен иметь разрешение на удаление сообщений.</remarks>
         public static async Task<bool> DeleteMessage(
-            this BotClient botClient,
+            this IBotClient botClient,
             string messageId,
             CancellationToken cancellationToken = default
         ) => (await botClient.ProcessApi<DeleteMessageParams, DTOs.ApiResponse>(
@@ -153,7 +153,7 @@ namespace Max.BotClient
         /// <returns>true, если запрос был успешным.</returns>
         /// <remarks>Хотя бы один из параметров message или notification должен быть указан.</remarks>
         public static async Task<bool> AnswerCallback(
-            this BotClient botClient,
+            this IBotClient botClient,
             string callbackId,
             Types.Message? message = null,
             string? notification = null,

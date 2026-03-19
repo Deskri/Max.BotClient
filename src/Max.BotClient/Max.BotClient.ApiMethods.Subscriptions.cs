@@ -14,7 +14,7 @@ namespace Max.BotClient
         /// <param name="botClient">Клиент бота.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
         public static async Task<Subscription[]> GetSubscriptions(
-            this BotClient botClient,
+            this IBotClient botClient,
             CancellationToken cancellationToken = default
         ) => (await botClient.ProcessApi<GetSubscriptionsResponse>(
             HttpMethod.Get,
@@ -32,7 +32,7 @@ namespace Max.BotClient
         /// <param name="secret">Секрет для заголовка X-Max-Bot-Api-Secret (5-256 символов, A-Z, a-z, 0-9, -, _).</param>
         /// <param name="cancellationToken">Токен отмены.</param>
         public static async Task<SubscribeResult> Subscribe(
-            this BotClient botClient,
+            this IBotClient botClient,
             string url,
             Types.UpdateType[]? updateTypes = null,
             string? secret = null,
@@ -52,7 +52,7 @@ namespace Max.BotClient
         /// <param name="url">URL вебхука для удаления из подписок.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
         public static async Task<SubscribeResult> Unsubscribe(
-            this BotClient botClient,
+            this IBotClient botClient,
             string url,
             CancellationToken cancellationToken = default
         ) => await botClient.ProcessApi<UnsubscribeParams, SubscribeResult>(
@@ -73,7 +73,7 @@ namespace Max.BotClient
         /// <param name="types">Типы обновлений для получения.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
         public static async Task<(Update[], long?)> GetUpdates(
-            this BotClient botClient,
+            this IBotClient botClient,
             int? limit = null,
             int? timeout = null,
             long? marker = null,

@@ -18,7 +18,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Список чатов и маркер для следующей страницы.</returns>
         public static async Task<Types.GetChatsResponse> GetChats(
-            this BotClient botClient,
+            this IBotClient botClient,
             int? count = null,
             long? marker = null,
             CancellationToken cancellationToken = default
@@ -38,7 +38,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Информация о чате, включая закреплённое сообщение (если есть).</returns>
         public static async Task<Types.Chat> GetChat(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
         ) => await botClient.ProcessApi<DTOs.Chat, Types.Chat>(
@@ -57,7 +57,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Обновлённая информация о чате.</returns>
         public static async Task<Types.Chat> UpdateChat(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             Types.UpdateChatRequest request,
             CancellationToken cancellationToken = default
@@ -77,7 +77,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>true, если запрос был успешным.</returns>
         public static async Task<bool> DeleteChat(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
         ) => (await botClient.ProcessApi<ApiResponse>(
@@ -96,7 +96,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>true, если запрос был успешным.</returns>
         public static async Task<bool> SendAction(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             Types.SenderAction action,
             CancellationToken cancellationToken = default
@@ -116,7 +116,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>Закреплённое сообщение или null, если в чате нет закреплённого сообщения.</returns>
         public static async Task<Types.Message?> GetPinnedMessage(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
         ) => (await botClient.ProcessApi<DTOs.GetPinnedMessageResponse, Types.GetPinnedMessageResponse>(
@@ -136,7 +136,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>true, если запрос был успешным.</returns>
         public static async Task<bool> PinMessage(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             string messageId,
             bool? notify = null,
@@ -157,7 +157,7 @@ namespace Max.BotClient
         /// <param name="cancellationToken">Токен отмены.</param>
         /// <returns>true, если запрос был успешным.</returns>
         public static async Task<bool> UnpinMessage(
-            this BotClient botClient,
+            this IBotClient botClient,
             long chatId,
             CancellationToken cancellationToken = default
         ) => (await botClient.ProcessApi<ApiResponse>(
