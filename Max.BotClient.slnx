@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/Max.BotClient/Max.BotClient.csproj" />
+  <Project Path="tests/Max.BotClient.Tests/Max.BotClient.Tests.csproj" />
+</Solution>

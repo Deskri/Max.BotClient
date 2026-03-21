@@ -1,0 +1,5 @@
+﻿/src/Max.BotClient/bin/
+/src/Max.BotClient/obj/
+/.idea/
+/tests/Max.BotClient.Tests/bin/
+/tests/Max.BotClient.Tests/obj/
