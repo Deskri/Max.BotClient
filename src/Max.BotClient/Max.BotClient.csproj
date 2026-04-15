@@ -10,6 +10,7 @@
         <Authors>Deskri</Authors>
         <Description>SDK for MAX Bot API (.NET Standard 2.0)</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Deskri/Max.BotClient</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Deskri/Max.BotClient</RepositoryUrl>
         <PackageTags>max;bot;api;sdk</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
