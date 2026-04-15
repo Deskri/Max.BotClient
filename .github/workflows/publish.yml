@@ -17,7 +17,11 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
+            8.0.x
             10.0.x
+
+      - name: Test
+        run: dotnet test tests/Max.BotClient.Tests/Max.BotClient.Tests.csproj -c Release
 
       - name: Build
         run: dotnet build src/Max.BotClient/Max.BotClient.csproj -c Release
