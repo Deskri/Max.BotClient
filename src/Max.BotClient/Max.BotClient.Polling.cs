@@ -42,19 +42,19 @@ namespace Max.BotClient
         /// <param name="errorHandler">Обработчик ошибок (необязательно).</param>
         /// <param name="options">Опции polling.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
-        public static void StartReceiving(
+        public static Task StartReceiving(
             this IBotClient botClient,
             Func<IBotClient, Update, CancellationToken, Task> updateHandler,
             Func<IBotClient, Exception, CancellationToken, Task>? errorHandler = null,
             ReceiverOptions? options = null,
             CancellationToken cancellationToken = default
-        ) => Task.Run(() => 
+        ) => Task.Run(() =>
                 botClient.ReceiveAsync(
-                    updateHandler, 
-                    errorHandler, 
-                    options, 
+                    updateHandler,
+                    errorHandler,
+                    options,
                     cancellationToken
-                ), 
+                ),
             cancellationToken
         );
 
