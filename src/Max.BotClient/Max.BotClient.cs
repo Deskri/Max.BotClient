@@ -39,7 +39,6 @@ namespace Max.BotClient
             _httpClient = httpClient ?? new HttpClient();
             _httpClient.BaseAddress = new Uri(_options.ApiUrl);
             _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", _options.Token);
-            _httpClient.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
         }
 
         public BotClient(
