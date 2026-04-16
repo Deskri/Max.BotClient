@@ -143,6 +143,16 @@ namespace Max.BotClient
                         // Не позволяем errorHandler убить polling loop
                     }
 
+                    // Backoff перед повторной попыткой, чтобы не забивать API при длительном сбое
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+
                     continue;
                 }
 
