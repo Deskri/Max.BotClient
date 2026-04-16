@@ -42,19 +42,19 @@ namespace Max.BotClient
         /// <param name="errorHandler">Обработчик ошибок (необязательно).</param>
         /// <param name="options">Опции polling.</param>
         /// <param name="cancellationToken">Токен отмены.</param>
-        public static void StartReceiving(
+        public static Task StartReceiving(
             this IBotClient botClient,
             Func<IBotClient, Update, CancellationToken, Task> updateHandler,
             Func<IBotClient, Exception, CancellationToken, Task>? errorHandler = null,
             ReceiverOptions? options = null,
             CancellationToken cancellationToken = default
-        ) => Task.Run(() => 
+        ) => Task.Run(() =>
                 botClient.ReceiveAsync(
-                    updateHandler, 
-                    errorHandler, 
-                    options, 
+                    updateHandler,
+                    errorHandler,
+                    options,
                     cancellationToken
-                ), 
+                ),
             cancellationToken
         );
 
@@ -83,7 +83,7 @@ namespace Max.BotClient
             {
                 try
                 {
-                    var (_, newMarker) = await botClient.GetUpdates(
+                    var (_, newMarker) = await botClient.Update(
                         limit: 1,
                         timeout: 0,
                         marker: null,
@@ -92,14 +92,21 @@ namespace Max.BotClient
                     );
                     marker = newMarker;
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
                     return;
                 }
                 catch (Exception ex)
                 {
-                    if (errorHandler != null)
-                        await errorHandler(botClient, ex, cancellationToken);
+                    try
+                    {
+                        if (errorHandler != null)
+                            await errorHandler(botClient, ex, cancellationToken);
+                    }
+                    catch
+                    {
+                        // Не позволяем errorHandler убить polling loop
+                    }
                 }
             }
 
@@ -109,7 +116,7 @@ namespace Max.BotClient
 
                 try
                 {
-                    var result = await botClient.GetUpdates(
+                    var result = await botClient.Update(
                         limit: options.Limit,
                         timeout: options.Timeout,
                         marker: marker,
@@ -120,14 +127,31 @@ namespace Max.BotClient
                     updates = result.Item1;
                     marker = result.Item2 ?? marker;
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
                 catch (Exception ex)
                 {
-                    if (errorHandler != null)
-                        await errorHandler(botClient, ex, cancellationToken);
+                    try
+                    {
+                        if (errorHandler != null)
+                            await errorHandler(botClient, ex, cancellationToken);
+                    }
+                    catch
+                    {
+                        // Не позволяем errorHandler убить polling loop
+                    }
+
+                    // Backoff перед повторной попыткой, чтобы не забивать API при длительном сбое
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
 
                     continue;
                 }
@@ -138,17 +162,51 @@ namespace Max.BotClient
                     {
                         await updateHandler(botClient, update, cancellationToken);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
                     catch (Exception ex)
                     {
-                        if (errorHandler != null)
-                            await errorHandler(botClient, ex, cancellationToken);
+                        try
+                        {
+                            if (errorHandler != null)
+                                await errorHandler(botClient, ex, cancellationToken);
+                        }
+                        catch
+                        {
+                            // Не позволяем errorHandler убить polling loop
+                        }
                     }
                 }
             }
+        }
+
+        private static Task<(Update[], long?)> Update(
+            this IBotClient botClient,
+            int? limit = null,
+            int? timeout = null,
+            long? marker = null,
+            Types.UpdateType[]? types = null,
+            CancellationToken cancellationToken = default
+        )
+        {
+            if (botClient is IBotClientInternal internalBotClient)
+                return internalBotClient.GetUpdatesFromPolling(
+                    limit,
+                    timeout,
+                    marker,
+                    types,
+                    cancellationToken
+                );
+            
+            return botClient.GetUpdates(
+                limit,
+                timeout,
+                marker,
+                types,
+                cancellationToken
+            );
         }
     }
 }

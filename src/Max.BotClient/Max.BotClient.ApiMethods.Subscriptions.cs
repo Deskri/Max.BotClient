@@ -90,5 +90,25 @@ namespace Max.BotClient
 
             return (response.Updates, response.Marker);
         }
+
+        private static async Task<(Update[], long?)> GetUpdatesFromPolling(
+            this IBotClientInternal botClient,
+            int? limit = null,
+            int? timeout = null,
+            long? marker = null,
+            Types.UpdateType[]? types = null,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var response = await botClient.PollingProcessApi<GetUpdatesParams, DTOs.GetUpdatesResponse, Types.GetUpdatesResponse>(
+                HttpMethod.Get,
+                "/updates",
+                () => new GetUpdatesParams
+                    { Limit = limit, Timeout = timeout, Marker = marker, UpdateTypes = types },
+                cancellationToken
+            );
+
+            return (response.Updates, response.Marker);
+        }
     }
 }
