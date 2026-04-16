@@ -6,7 +6,6 @@
         <Nullable>enable</Nullable>
         <Version>1.0.2</Version>
 
-
         <PackageId>Max.BotClient</PackageId>
         <Authors>Deskri</Authors>
         <Description>SDK for MAX Bot API (.NET Standard 2.0)</Description>
