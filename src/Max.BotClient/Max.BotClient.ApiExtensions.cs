@@ -72,5 +72,18 @@ namespace Max.BotClient
             ApiRequestBinder.Bind(createParams(), basePath, out var path, out var body);
             await botClient.SendRequest<object>(method, path, body, cancellationToken);
         }
+        
+        internal static async Task<TResult> PollingProcessApi<TParams, TDto, TResult>(
+            this IBotClientInternal botClient,
+            HttpMethod method,
+            string basePath,
+            Func<TParams> createParams,
+            CancellationToken cancellationToken = default
+        ) where TParams : class
+        {
+            ApiRequestBinder.Bind(createParams(), basePath, out var path, out var body);
+            var dto = await botClient.PollingSendRequest<TDto>(method, path, body, cancellationToken);
+            return dto.ToResult<TDto, TResult>();
+        }
     }
 }

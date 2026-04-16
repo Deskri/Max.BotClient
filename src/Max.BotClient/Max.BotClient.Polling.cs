@@ -48,13 +48,13 @@ namespace Max.BotClient
             Func<IBotClient, Exception, CancellationToken, Task>? errorHandler = null,
             ReceiverOptions? options = null,
             CancellationToken cancellationToken = default
-        ) => Task.Run(() => 
+        ) => Task.Run(() =>
                 botClient.ReceiveAsync(
-                    updateHandler, 
-                    errorHandler, 
-                    options, 
+                    updateHandler,
+                    errorHandler,
+                    options,
                     cancellationToken
-                ), 
+                ),
             cancellationToken
         );
 
@@ -83,7 +83,7 @@ namespace Max.BotClient
             {
                 try
                 {
-                    var (_, newMarker) = await botClient.GetUpdates(
+                    var (_, newMarker) = await botClient.Update(
                         limit: 1,
                         timeout: 0,
                         marker: null,
@@ -109,7 +109,7 @@ namespace Max.BotClient
 
                 try
                 {
-                    var result = await botClient.GetUpdates(
+                    var result = await botClient.Update(
                         limit: options.Limit,
                         timeout: options.Timeout,
                         marker: marker,
@@ -149,6 +149,33 @@ namespace Max.BotClient
                     }
                 }
             }
+        }
+
+        private static Task<(Update[], long?)> Update(
+            this IBotClient botClient,
+            int? limit = null,
+            int? timeout = null,
+            long? marker = null,
+            Types.UpdateType[]? types = null,
+            CancellationToken cancellationToken = default
+        )
+        {
+            if (botClient is IBotClientInternal internalBotClient)
+                return internalBotClient.GetUpdatesFromPolling(
+                    limit,
+                    timeout,
+                    marker,
+                    types,
+                    cancellationToken
+                );
+            
+            return botClient.GetUpdates(
+                limit,
+                timeout,
+                marker,
+                types,
+                cancellationToken
+            );
         }
     }
 }
