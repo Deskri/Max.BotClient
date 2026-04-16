@@ -92,7 +92,7 @@ namespace Max.BotClient
                     );
                     marker = newMarker;
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
                     return;
                 }
@@ -120,7 +120,7 @@ namespace Max.BotClient
                     updates = result.Item1;
                     marker = result.Item2 ?? marker;
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
@@ -138,7 +138,7 @@ namespace Max.BotClient
                     {
                         await updateHandler(botClient, update, cancellationToken);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
