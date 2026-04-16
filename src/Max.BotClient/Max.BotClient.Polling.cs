@@ -98,8 +98,15 @@ namespace Max.BotClient
                 }
                 catch (Exception ex)
                 {
-                    if (errorHandler != null)
-                        await errorHandler(botClient, ex, cancellationToken);
+                    try
+                    {
+                        if (errorHandler != null)
+                            await errorHandler(botClient, ex, cancellationToken);
+                    }
+                    catch
+                    {
+                        // Не позволяем errorHandler убить polling loop
+                    }
                 }
             }
 
@@ -126,8 +133,15 @@ namespace Max.BotClient
                 }
                 catch (Exception ex)
                 {
-                    if (errorHandler != null)
-                        await errorHandler(botClient, ex, cancellationToken);
+                    try
+                    {
+                        if (errorHandler != null)
+                            await errorHandler(botClient, ex, cancellationToken);
+                    }
+                    catch
+                    {
+                        // Не позволяем errorHandler убить polling loop
+                    }
 
                     continue;
                 }
@@ -144,8 +158,15 @@ namespace Max.BotClient
                     }
                     catch (Exception ex)
                     {
-                        if (errorHandler != null)
-                            await errorHandler(botClient, ex, cancellationToken);
+                        try
+                        {
+                            if (errorHandler != null)
+                                await errorHandler(botClient, ex, cancellationToken);
+                        }
+                        catch
+                        {
+                            // Не позволяем errorHandler убить polling loop
+                        }
                     }
                 }
             }
