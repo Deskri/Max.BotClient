@@ -1,29 +1,29 @@
 # Max.BotClient
 
-<div align="center">
 
 [![.NET Standard](https://img.shields.io/badge/.NET%20Standard-2.0-blue?style=flat-square)](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
+[![.NET](https://img.shields.io/badge/.NET-10.0-blueviolet?style=flat-square)](https://dotnet.microsoft.com/)
+[![NuGet](https://img.shields.io/nuget/v/Max.BotClient?style=flat-square)](https://www.nuget.org/packages/Max.BotClient)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 **Неофициальный .NET SDK для [MAX Bot API](https://dev.max.ru/docs-api)**
 &nbsp;·&nbsp;
 **Unofficial .NET SDK for [MAX Bot API](https://dev.max.ru/docs-api)**
 
-</div>
 
 ---
 
-> **[Русский](#русский) · [English](#english)**
+> **[Русский](#содержание) · [English](#table-of-contents)**
 
 ---
-
-# Русский
 
 ## Содержание
 
 - [О проекте](#о-проекте)
+- [Установка](#установка)
 - [Быстрый старт](#быстрый-старт)
 - [Конфигурация](#конфигурация)
+- [Dependency Injection](#dependency-injection)
 - [Получение обновлений](#получение-обновлений)
 - [Справочник API методов](#справочник-api-методов)
   - [Сообщения](#сообщения)
@@ -39,7 +39,7 @@
 ## О проекте
 
 `Max.BotClient` — библиотека для разработки ботов на платформе [MAX](https://max.ru).
-Написана на **.NET Standard 2.0**, совместима с .NET Framework 4.6.1+ и .NET Core 2.0+.
+Мультитаргет: **.NET Standard 2.0** (для совместимости с .NET Framework 4.6.1+ и .NET Core 2.0+) и **.NET 10.0** (с расширениями для DI).
 
 **Ключевые возможности:**
 
@@ -48,8 +48,24 @@
 - Long Polling из коробки с автоматической пагинацией через маркеры
 - Поддержка Webhook-подписок
 - Автоматические повторные запросы при ошибках 429/5xx (exponential backoff)
+- Встроенный rate limiting через семафор (отдельные лимиты для обычных и polling запросов)
+- Расширение `AddMaxBotClient()` для `IServiceCollection` (на .NET 10.0+)
 - Поддержка вложений: фото, видео, аудио, файлы, стикеры, контакты, геолокация
 - Inline-клавиатуры с fluent-builder
+
+---
+
+## Установка
+
+```bash
+dotnet add package Max.BotClient
+```
+
+Или через `PackageReference` в `.csproj`:
+
+```xml
+<PackageReference Include="Max.BotClient" Version="*" />
+```
 
 ---
 
@@ -80,9 +96,11 @@ await bot.SendMessage(chatId, new Message("Привет, чат!").ToChat());
 ```csharp
 var options = new BotClientOptions("ВАШ_ТОКЕН")
 {
-    RetryCount = 3,          // Максимум повторных попыток при 429/5xx (по умолчанию: 3)
-    RetryDelaySeconds = 1    // Начальная задержка в секундах для exponential backoff (по умолчанию: 1)
-                             // Фактические задержки: 1s, 2s, 4s...
+    RetryCount = 3,           // Максимум повторных попыток при 429/5xx (по умолчанию: 3)
+    RetryDelaySeconds = 1,    // Начальная задержка для exponential backoff в секундах (по умолчанию: 1)
+                              // Фактические задержки: 1s, 2s, 4s...
+    RPS = 30,                 // Лимит обычных запросов в секунду (по умолчанию: 30; 0 — без ограничения)
+    PollingRPS = 2            // Лимит polling-запросов в секунду (по умолчанию: 2; 0 — без ограничения)
 };
 
 var bot = new BotClient(options);
@@ -90,6 +108,39 @@ var bot = new BotClient(options);
 // Можно передать собственный HttpClient
 var httpClient = new HttpClient();
 var bot2 = new BotClient(options, httpClient);
+```
+
+> **О rate limiting.** SDK сериализует исходящие запросы через семафор и гарантирует минимальный интервал между стартами запросов: `ceil(1000 / RPS)` мс для обычных вызовов и `ceil(1000 / PollingRPS)` мс для long polling. Обычный и polling клиенты имеют независимые счётчики. Установите `0` чтобы полностью отключить ограничение.
+
+---
+
+## Dependency Injection
+
+> Доступно при таргете **.NET 10.0+**. Регистрирует `BotClient` и `IBotClient` как singleton и подключает их через `IHttpClientFactory` (named client `"MaxBotClient"`).
+
+```csharp
+using Max.BotClient;
+using Microsoft.Extensions.DependencyInjection;
+
+var services = new ServiceCollection();
+
+services.AddMaxBotClient("ВАШ_ТОКЕН", options =>
+{
+    options.RPS = 30;
+    options.PollingRPS = 2;
+    options.RetryCount = 3;
+});
+
+var provider = services.BuildServiceProvider();
+var bot = provider.GetRequiredService<IBotClient>();
+```
+
+`AddHttpClient("MaxBotClient")` регистрируется автоматически — при необходимости можно подключить дополнительные delegating handlers (Polly, метрики, логирование):
+
+```csharp
+services.AddMaxBotClient("ВАШ_ТОКЕН");
+services.AddHttpClient("MaxBotClient")
+    .AddPolicyHandler(/* ваша Polly-политика */);
 ```
 
 ---
@@ -408,13 +459,13 @@ catch (OperationCanceledException)
 
 ---
 
-# English
-
 ## Table of Contents
 
 - [About](#about)
+- [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
+- [Dependency Injection](#dependency-injection-1)
 - [Receiving Updates](#receiving-updates)
 - [API Methods Reference](#api-methods-reference)
   - [Messages](#messages)
@@ -430,7 +481,7 @@ catch (OperationCanceledException)
 ## About
 
 `Max.BotClient` is a library for building bots on the [MAX](https://max.ru) platform.
-Targets **.NET Standard 2.0** — compatible with .NET Framework 4.6.1+ and .NET Core 2.0+.
+Multi-targets **.NET Standard 2.0** (compatible with .NET Framework 4.6.1+ and .NET Core 2.0+) and **.NET 10.0** (with DI extensions).
 
 **Key features:**
 
@@ -439,8 +490,24 @@ Targets **.NET Standard 2.0** — compatible with .NET Framework 4.6.1+ and .NET
 - Built-in Long Polling with automatic marker-based pagination
 - Webhook subscription support
 - Automatic retries on 429/5xx errors (exponential backoff)
+- Built-in semaphore-based rate limiting (independent limits for regular and polling requests)
+- `AddMaxBotClient()` extension for `IServiceCollection` (on .NET 10.0+)
 - Attachment support: photos, videos, audio, files, stickers, contacts, locations
 - Inline keyboards with fluent builder
+
+---
+
+## Installation
+
+```bash
+dotnet add package Max.BotClient
+```
+
+Or via `PackageReference` in your `.csproj`:
+
+```xml
+<PackageReference Include="Max.BotClient" Version="*" />
+```
 
 ---
 
@@ -471,9 +538,11 @@ await bot.SendMessage(chatId, new Message("Hello, chat!").ToChat());
 ```csharp
 var options = new BotClientOptions("YOUR_TOKEN")
 {
-    RetryCount = 3,          // Max retries on 429/5xx (default: 3)
-    RetryDelaySeconds = 1    // Initial delay in seconds for exponential backoff (default: 1)
-                             // Actual delays: 1s, 2s, 4s...
+    RetryCount = 3,           // Max retries on 429/5xx (default: 3)
+    RetryDelaySeconds = 1,    // Initial delay in seconds for exponential backoff (default: 1)
+                              // Actual delays: 1s, 2s, 4s...
+    RPS = 30,                 // Regular requests per second cap (default: 30; 0 = no limit)
+    PollingRPS = 2            // Long-polling requests per second cap (default: 2; 0 = no limit)
 };
 
 var bot = new BotClient(options);
@@ -481,6 +550,39 @@ var bot = new BotClient(options);
 // You can also inject a custom HttpClient
 var httpClient = new HttpClient();
 var bot2 = new BotClient(options, httpClient);
+```
+
+> **About rate limiting.** The SDK serializes outgoing requests through a semaphore and guarantees a minimum interval between request starts: `ceil(1000 / RPS)` ms for regular calls and `ceil(1000 / PollingRPS)` ms for long polling. The regular and polling clients have independent counters. Set the value to `0` to disable throttling entirely.
+
+---
+
+## Dependency Injection
+
+> Available when targeting **.NET 10.0+**. Registers `BotClient` and `IBotClient` as singletons and wires them through `IHttpClientFactory` (named client `"MaxBotClient"`).
+
+```csharp
+using Max.BotClient;
+using Microsoft.Extensions.DependencyInjection;
+
+var services = new ServiceCollection();
+
+services.AddMaxBotClient("YOUR_TOKEN", options =>
+{
+    options.RPS = 30;
+    options.PollingRPS = 2;
+    options.RetryCount = 3;
+});
+
+var provider = services.BuildServiceProvider();
+var bot = provider.GetRequiredService<IBotClient>();
+```
+
+`AddHttpClient("MaxBotClient")` is registered automatically — you can attach extra delegating handlers (Polly, metrics, logging) on top:
+
+```csharp
+services.AddMaxBotClient("YOUR_TOKEN");
+services.AddHttpClient("MaxBotClient")
+    .AddPolicyHandler(/* your Polly policy */);
 ```
 
 ---
