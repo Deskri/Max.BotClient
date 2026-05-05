@@ -35,6 +35,8 @@ namespace Max.BotClient
         private readonly HttpClient _httpClient;
         private readonly bool _ownsHttpClient;
         private HttpClient? _pollingHttpClient;
+        private readonly Throttle _throttle = new Throttle();
+        private readonly Throttle _pollingThrottle = new Throttle();
         private bool _disposed;
 
         public string Token => _options.Token;
@@ -68,7 +70,15 @@ namespace Max.BotClient
             string path,
             object? body = null,
             CancellationToken cancellationToken = default
-        ) => await SendRequestCore<TResponse>(_httpClient, method, path, body, cancellationToken);
+        ) => await SendRequestCore<TResponse>(
+            _httpClient, 
+            _throttle, 
+            _options.RPS, 
+            method, 
+            path, 
+            body, 
+            cancellationToken
+        );
         
         async Task<TResponse> IBotClientInternal.PollingSendRequest<TResponse>(
             HttpMethod method,
@@ -87,11 +97,21 @@ namespace Max.BotClient
                 _pollingHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", _options.Token);
             }
 
-            return await SendRequestCore<TResponse>(_pollingHttpClient, method, path, body, cancellationToken);
+            return await SendRequestCore<TResponse>(
+                _pollingHttpClient, 
+                _pollingThrottle, 
+                _options.PollingRPS, 
+                method, 
+                path, 
+                body, 
+                cancellationToken
+            );
         }
 
         private async Task<TResponse> SendRequestCore<TResponse>(
             HttpClient httpClient,
+            Throttle throttle,
+            int rps,
             HttpMethod method,
             string path,
             object? body,
@@ -100,6 +120,8 @@ namespace Max.BotClient
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(GlobalCancelToken, cancellationToken);
             var token = cts.Token;
+
+            await throttle.WaitAsync(rps, token);
 
             MaxBotClientApiException? lastException = null;
 
@@ -147,6 +169,8 @@ namespace Max.BotClient
             _disposed = true;
 
             _pollingHttpClient?.Dispose();
+            _throttle.Dispose();
+            _pollingThrottle.Dispose();
             if (_ownsHttpClient) _httpClient.Dispose();
         }
     }

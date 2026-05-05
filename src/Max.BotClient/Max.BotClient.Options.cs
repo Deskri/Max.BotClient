@@ -16,6 +16,16 @@ namespace Max.BotClient
         /// Максимальное количество повторных попыток при ошибках 429/5xx.
         /// </summary>
         public int RetryCount { get; set; } = 3;
+
+        /// <summary>
+        /// Максимальная частота обычных API-запросов в секунду. 0 — без ограничения.
+        /// </summary>
+        public int RPS { get; set; } = 30;
+
+        /// <summary>
+        /// Максимальная частота polling-запросов в секунду. 0 — без ограничения.
+        /// </summary>
+        public int PollingRPS { get; set; } = 2;
     
         public BotClientOptions(
             string token,
