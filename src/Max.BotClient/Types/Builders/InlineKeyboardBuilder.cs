@@ -94,7 +94,13 @@ namespace Max.BotClient.Types.Builders
         /// <param name="text">Текст на кнопке</param>
         /// <param name="webApp">URL веб-приложения</param>
         /// <param name="chatId">ID чата (опционально)</param>
-        public InlineKeyboardBuilder AddOpenAppButton(string text, string webApp, long? chatId = null)
+        /// <param name="payload">Параметр запуска, который будет передан в initData мини-приложения (опционально)</param>
+        public InlineKeyboardBuilder AddOpenAppButton(
+            string text, 
+            string webApp, 
+            long? chatId = null, 
+            string? payload = null
+        )
         {
             EnsureCurrentRow();
             _currentRow!.Add(new ButtonRequest
@@ -102,7 +108,8 @@ namespace Max.BotClient.Types.Builders
                 Type = ButtonRequestType.OpenApp,
                 Text = text,
                 WebApp = webApp,
-                ChatId = chatId
+                ChatId = chatId,
+                Payload = payload,
             });
             return this;
         }

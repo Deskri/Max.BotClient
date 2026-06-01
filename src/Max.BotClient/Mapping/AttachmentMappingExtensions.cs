@@ -190,6 +190,7 @@ namespace Max.BotClient.Mapping
                 case DTOs.OpenAppButton app:
                     result.WebApp = app.WebApp;
                     result.ContactId = app.ContactId;
+                    result.Payload = app.Payload;
                     break;
             }
 

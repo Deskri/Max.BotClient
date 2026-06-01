@@ -217,7 +217,8 @@ namespace Max.BotClient.Mapping
                     {
                         Text = type.Text,
                         WebApp = type.WebApp,
-                        ContactId = type.ChatId
+                        ContactId = type.ChatId,
+                        Payload = type.Payload
                     };
 
                 case Types.ButtonRequestType.Message:
