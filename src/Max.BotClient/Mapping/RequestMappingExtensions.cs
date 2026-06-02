@@ -67,10 +67,7 @@ namespace Max.BotClient.Mapping
                         Payload = new PhotoAttachmentRequestPayload
                         {
                             Url = type.Payload?.Url,
-                            Token = type.Payload?.Token,
-                            Photos = type.Payload?.Token != null
-                                ? new DTOs.PhotoToken { Token = type.Payload.Token }
-                                : null
+                            Token = type.Payload?.Token
                         }
                     };
 

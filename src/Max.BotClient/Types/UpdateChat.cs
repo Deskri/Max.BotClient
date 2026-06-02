@@ -1,3 +1,5 @@
+using System;
+
 namespace Max.BotClient.Types
 {
     /// <summary>
@@ -44,6 +46,7 @@ namespace Max.BotClient.Types
         /// <summary>
         /// Токены, полученные после загрузки изображений.
         /// </summary>
+        [Obsolete("Поле photos не поддерживается MAX API в этой форме и игнорируется (всегда отправляется null). Используйте ChatIcon.FromToken/FromUrl.")]
         public PhotoToken? Photos { get; set; }
 
         /// <summary>
@@ -59,12 +62,14 @@ namespace Max.BotClient.Types
         /// <summary>
         /// Создать иконку с токеном загруженного изображения.
         /// </summary>
+        [Obsolete("Поле photos не поддерживается MAX API в этой форме и игнорируется (всегда отправляется null). Используйте ChatIcon.FromToken/FromUrl.")]
         public static ChatIcon FromPhotos(PhotoToken photos) => new ChatIcon { Photos = photos };
     }
 
     /// <summary>
     /// Токен загруженного изображения.
     /// </summary>
+    [Obsolete("Поле photos не поддерживается MAX API в этой форме и игнорируется (всегда отправляется null). Используйте ChatIcon.FromToken/FromUrl.")]
     public class PhotoToken
     {
         /// <summary>

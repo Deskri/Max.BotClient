@@ -31,21 +31,7 @@ namespace Max.BotClient.Mapping
             return new DTOs.PhotoAttachmentRequestPayload
             {
                 Url = icon.Url,
-                Token = icon.Token,
-                Photos = icon.Photos?.ToPhotoTokenDto()
-            };
-        }
-
-        /// <summary>
-        /// Преобразует Types PhotoToken в DTO PhotoToken.
-        /// </summary>
-        private static DTOs.PhotoToken? ToPhotoTokenDto(this Types.PhotoToken? photoToken)
-        {
-            if (photoToken == null) return null;
-
-            return new DTOs.PhotoToken
-            {
-                Token = photoToken.Token
+                Token = icon.Token
             };
         }
     }

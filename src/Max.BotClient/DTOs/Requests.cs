@@ -119,20 +119,10 @@ namespace Max.BotClient.DTOs
 
         /// <summary>
         /// Токены, полученные после загрузки изображений.
+        /// Структура не документирована в API (object Nullable optional), поэтому
+        /// поле не заполняется и всегда сериализуется как null.
         /// </summary>
-        public PhotoToken? Photos { get; set; }
-    }
-
-    /// <summary>
-    /// Токен загруженного изображения.
-    /// <see href="https://dev.max.ru/docs-api/objects/NewMessageBody"/>
-    /// </summary>
-    internal class PhotoToken
-    {
-        /// <summary>
-        /// Закодированная информация загруженного изображения.
-        /// </summary>
-        public string Token { get; set; }
+        public object? Photos { get; set; }
     }
 
     /// <summary>
