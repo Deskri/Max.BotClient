@@ -112,6 +112,8 @@ var bot2 = new BotClient(options, httpClient);
 
 > **О rate limiting.** SDK сериализует исходящие запросы через семафор и гарантирует минимальный интервал между стартами запросов: `ceil(1000 / RPS)` мс для обычных вызовов и `ceil(1000 / PollingRPS)` мс для long polling. Обычный и polling клиенты имеют независимые счётчики. Установите `0` чтобы полностью отключить ограничение.
 
+> **О сертификате Минцифры.** Согласно [changelog MAX](https://dev.max.ru/docs-api/changelog-api), с 19 июля 2026 для корректной работы чат-ботов необходимо добавить сертификат Минцифры в список доверенных на машине, где запущен бот.
+
 ---
 
 ## Dependency Injection
@@ -553,6 +555,8 @@ var bot2 = new BotClient(options, httpClient);
 ```
 
 > **About rate limiting.** The SDK serializes outgoing requests through a semaphore and guarantees a minimum interval between request starts: `ceil(1000 / RPS)` ms for regular calls and `ceil(1000 / PollingRPS)` ms for long polling. The regular and polling clients have independent counters. Set the value to `0` to disable throttling entirely.
+
+> **About the Ministry of Digital Development certificate.** According to the [MAX changelog](https://dev.max.ru/docs-api/changelog-api), starting July 19, 2026, bots require the Russian Ministry of Digital Development (Mintsifry) certificate to be added to the trusted certificates on the machine running the bot.
 
 ---
 

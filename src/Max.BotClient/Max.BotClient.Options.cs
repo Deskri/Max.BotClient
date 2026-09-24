@@ -4,7 +4,7 @@ namespace Max.BotClient
 {
     public class BotClientOptions
     {
-        private const string BaseUrl = "https://platform-api.max.ru";
+        private const string BaseUrl = "https://platform-api2.max.ru";
         public string Token { get; }
         public string ApiUrl { get; }
         /// <summary>
